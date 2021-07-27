@@ -1,8 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getTodos, getUsers } from './service';
 
-export default class App extends PureComponent {
-  defaultDomainIndex = 0;
+export default function App() {
+  const defaultDomainIndex = 0,
   domains = [
     'all',
     '.biz',
@@ -15,50 +15,45 @@ export default class App extends PureComponent {
     '.io',
   ];
 
-  state = {
-    users: [],
-    todos: [],
-    filter: this.domains[this.defaultDomainIndex],
-  };
-  getUserTodos(todos,userId) {
-    return todos.filter((o) => o.userId === userId && o.completed).length
-  }
-  async componentDidMount() {
-    const users = await getUsers();
-    const todos = await getTodos();
-    
-    this.setState({ users, todos });
-  }
+  const [users, setUsers] = useState([]);
+  const [todos, setTodos] = useState([]);
+  const [filter, setFilter] = useState(domains[defaultDomainIndex]);
 
-  listUsers(users,todos, filter) {
-    return (
-      <ul>
+  const getUserTodos = (todos, userId) => todos.filter((o) => o.userId === userId && o.completed).length;
+
+  useEffect(() => {
+   const fetchData = async () => {    try{
+        const _users = await getUsers();
+        const _todos = await getTodos();
+        // setState({ users, todos });
+        setUsers(_users);
+        setTodos(_todos);
+      }
+      catch(error){
+        console.error(error);
+      }
+    }
+    fetchData()
+  }, []);
+
+  const listUsers = (users, todos, filter) => <ul>
         {users.filter((o) => filter === 'all' || o?.email?.endsWith(filter)).map((user) => {
-          return <li key={user.name}>{user.name} has completed {this.getUserTodos(todos,user.id)} todos</li>;
+          return <li key={user.name}>{user.name} has completed {getUserTodos(todos,user.id)} todos</li>;
         })}
-      </ul>
-    );
-  }
+      </ul>;
 
-  renderDropDown() {
-    return (
-      <select value={this.state.filter} onChange={(e) => {this.setState({filter:e.target.value})}}>
-        {this.domains.map((domain) => (
+  const renderDropDown = () => <select value={filter} onChange={(e) => {setFilter(e.target.value)}}>
+        {domains.map((domain) => (
           <option key={domain} value={domain}>
             {domain}
           </option>
         ))}
-      </select>
-    );
-  }
+      </select>;
 
-  render() {
-    const { users, todos, filter } = this.state;
     return (
       <>
-        {this.renderDropDown()}
-        {this.listUsers(users,todos, filter)}
+        {renderDropDown()}
+        {listUsers(users, todos, filter)}
       </>
     );
-  }
 }
