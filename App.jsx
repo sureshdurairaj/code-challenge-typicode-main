@@ -20,20 +20,24 @@ export default class App extends PureComponent {
     todos: [],
     filter: this.domains[this.defaultDomainIndex],
   };
+
   getUserTodos(todos,userId) {
     return todos.filter((o) => o.userId === userId && o.completed).length
   }
+
   async componentDidMount() {
     const users = await getUsers();
     const todos = await getTodos();
-    
     this.setState({ users, todos });
   }
 
-  listUsers(users,todos, filter) {
+  // checking if filter is 'all' then render all items
+  // for other types using endsWith to filter email
+  listUsers(users, todos, filter) {
+    const filteredUsers = users.filter((o) => filter === 'all' || o?.email?.endsWith(filter));
     return (
       <ul>
-        {users.filter((o) => filter === 'all' || o?.email?.endsWith(filter)).map((user) => {
+        {filteredUsers.map((user) => {
           return <li key={user.name}>{user.name} has completed {this.getUserTodos(todos,user.id)} todos</li>;
         })}
       </ul>

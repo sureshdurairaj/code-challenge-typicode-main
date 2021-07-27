@@ -14,7 +14,7 @@ describe('listUsers', () => {
 
     expect(actual.props.children).toHaveLength(2);
   });
-  it('returns a child element for each user with filte email', () => {
+  it('returns a child element for each user with filter email', () => {
     const instance = new App();
     const actual = instance.listUsers([{ name: 'User A', email:'email.test' }, { name: 'User B' }], [], '.test');
     expect(actual.props.children).toHaveLength(1);
